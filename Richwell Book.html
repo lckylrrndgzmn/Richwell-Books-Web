@@ -1,0 +1,566 @@
+ <html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Richwell Book - Library Management System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f5f3ff',
+                            100: '#ede9fe',
+                            200: '#ddd6fe',
+                            500: '#8b5cf6',
+                            600: '#7c3aed',
+                            700: '#6d28d9',
+                            900: '#4c1d95',
+                        },
+                        slate: {
+                            950: '#090d16'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 3px; }
+        .glass-panel { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(8px); }
+    </style>
+</head>
+<body class="bg-slate-50 font-sans text-slate-800 antialiased h-screen overflow-hidden">
+
+    <div id="login-screen" class="fixed inset-0 flex items-center justify-center bg-slate-900 z-50 transition-all duration-500 select-none">
+        <div class="absolute inset-0 overflow-hidden opacity-30 pointer-events-none">
+            <div class="absolute -top-40 -right-40 w-96 h-96 bg-brand-600 rounded-full filter blur-3xl"></div>
+            <div class="absolute -bottom-40 -left-40 w-96 h-96 bg-brand-900 rounded-full filter blur-3xl"></div>
+        </div>
+
+        <div class="w-full max-w-md p-8 bg-slate-900/40 border border-slate-800 glass-panel rounded-3xl shadow-2xl z-10 flex flex-col justify-between backdrop-blur-xl">
+            <div class="text-center mb-8">
+                <div class="inline-flex items-center justify-center w-16 h-16 bg-brand-500/10 text-brand-500 rounded-2xl mb-4 border border-brand-500/20">
+                    <i class="fa-solid fa-book-bookmark text-2xl"></i>
+                </div>
+                <h1 class="text-3xl font-black text-white tracking-tight">Richwell Book<span class="text-brand-500">.</span></h1>
+                <p class="text-sm text-slate-400 mt-1">Universal Library Management System</p>
+            </div>
+            
+            <div class="space-y-6">
+                <div>
+                    <label class="block mb-2 text-xs font-bold text-slate-300 uppercase tracking-wider" for="username">Staff Identifier</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-4 text-slate-500">
+                            <i class="fa-solid fa-user-astronaut"></i>
+                        </span>
+                        <input type="text" id="username" autocomplete="off" onkeyup="syncUsername()"
+                            class="w-full pl-12 pr-4 py-3.5 bg-slate-950 border border-slate-800 text-white placeholder-slate-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition" 
+                            placeholder="e.g. user_name">
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-between text-xs font-medium">
+                    <label class="flex items-center text-slate-400 hover:text-slate-300 cursor-pointer">
+                        <input type="checkbox" class="rounded border-slate-700 bg-slate-800 text-brand-600 focus:ring-brand-500 mr-2"> Keep me signed in
+                    </label>
+                    <span class="text-slate-500 select-none">Internal Access Portal</span>
+                </div>
+
+                <button onclick="handleLoginFlow(event)"
+                    class="w-full py-4 px-4 bg-brand-600 hover:bg-brand-500 hover:shadow-lg hover:shadow-brand-500/20 text-white font-bold rounded-xl transition duration-300 flex items-center justify-center tracking-wide select-none">
+                    Enter Dashboard <i class="fa-solid fa-arrow-right-long ml-3 text-sm animate-pulse"></i>
+                </button>
+            </div>
+
+            <p class="text-center text-slate-600 text-xs mt-8">
+                Richwell Book Library System &bull; Version 4.0
+            </p>
+        </div>
+    </div>
+
+
+    <div id="dashboard" class="hidden min-h-screen flex h-screen overflow-hidden">
+        
+        <aside class="w-64 bg-slate-950 text-slate-400 flex flex-col justify-between select-none shrink-0 border-r border-slate-900">
+            <div>
+                <div class="h-20 flex items-center px-6 bg-slate-950/40 border-b border-slate-900/60">
+                    <div class="w-10 h-10 bg-brand-600/10 text-brand-500 border border-brand-500/20 rounded-xl flex items-center justify-center mr-3 font-bold text-lg">
+                        <i class="fa-solid fa-book-bookmark"></i>
+                    </div>
+                    <span class="text-lg font-black text-white tracking-wide">Richwell Book<span class="text-brand-500">.</span></span>
+                </div>
+
+                <nav class="mt-6 px-4 space-y-2">
+                    <button onclick="switchTab('tab-dashboard')" id="nav-dashboard" 
+                        class="nav-link w-full flex items-center px-4 py-3 text-sm font-semibold tracking-wide text-white bg-slate-900 rounded-xl transition">
+                        <i class="fa-solid fa-square-poll-vertical w-6 text-brand-500"></i> Analytics Hub
+                    </button>
+                    <button onclick="switchTab('tab-catalog')" id="nav-catalog" 
+                        class="nav-link w-full flex items-center px-4 py-3 text-sm font-semibold tracking-wide hover:text-white hover:bg-slate-900 rounded-xl transition">
+                        <i class="fa-solid fa-layer-group w-6"></i> Book Registry
+                    </button>
+                    <button onclick="switchTab('tab-members')" id="nav-members" 
+                        class="nav-link w-full flex items-center px-4 py-3 text-sm font-semibold tracking-wide hover:text-white hover:bg-slate-900 rounded-xl transition">
+                        <i class="fa-solid fa-id-card-clip w-6"></i> Members & Staff
+                    </button>
+                </nav>
+            </div>
+
+            <div class="p-4 border-t border-slate-900 bg-slate-900/20">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <div class="w-11 h-11 bg-brand-600/20 text-brand-400 font-extrabold rounded-xl flex items-center justify-center border border-brand-500/30 select-none tracking-wide text-base" id="user-initial">
+                            C
+                        </div>
+                        <div class="ml-3 truncate max-w-[120px]">
+                            <p class="text-sm font-bold text-slate-100 leading-tight tracking-wide truncate" id="active-user-display">Curator</p>
+                            <span class="text-xs text-slate-500">Senior Librarian</span>
+                        </div>
+                    </div>
+                    <button onclick="handleLogoutFlow()" class="p-2.5 text-slate-500 hover:text-red-400 transition" title="Sign out of system">
+                        <i class="fa-solid fa-power-off text-base"></i>
+                    </button>
+                </div>
+            </div>
+        </aside>
+
+        <main class="flex-1 flex flex-col h-screen overflow-hidden bg-slate-50">
+            
+            <header class="h-20 bg-white border-b border-slate-200/80 px-8 flex items-center justify-between flex-shrink-0">
+                <div class="relative w-96">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400">
+                        <i class="fa-solid fa-magnifying-glass text-sm"></i>
+                    </span>
+                    <input type="text" placeholder="Search catalog items, IDs, keywords..." 
+                        class="w-full pl-11 pr-4 py-2.5 text-sm bg-slate-100/60 border border-slate-200/80 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white focus:border-transparent transition">
+                </div>
+
+                <div class="flex items-center space-x-4">
+                    <button class="relative p-2.5 text-slate-400 hover:text-brand-600 transition">
+                        <i class="fa-solid fa-bell text-lg"></i>
+                        <span class="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
+                    </button>
+                    <div class="h-6 w-px bg-slate-200"></div>
+                    <button onclick="openModal()" class="px-5 py-2.5 bg-brand-600 hover:bg-brand-700 text-white text-sm font-bold rounded-xl transition flex items-center shadow-lg shadow-brand-500/10">
+                        <i class="fa-solid fa-plus mr-2 text-xs"></i> Add Title
+                    </button>
+                </div>
+            </header>
+
+            <div id="tab-dashboard" class="tab-content flex-1 p-8 overflow-y-auto bg-slate-50 custom-scrollbar">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-extrabold text-slate-900 tracking-tight">Analytics Hub</h2>
+                    <p class="text-slate-500 text-sm mt-0.5">Summary of real-time library operations.</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <div class="bg-white p-6 rounded-2xl border border-slate-100 flex items-center justify-between shadow-sm">
+                        <div>
+                            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Catalog Inventory</span>
+                            <h3 class="text-3xl font-black text-slate-800 mt-1">158</h3>
+                            <span class="text-xs text-brand-600 font-semibold mt-1 inline-block"><i class="fa-solid fa-arrow-up"></i> +120 new books</span>
+                        </div>
+                        <div class="w-14 h-14 bg-brand-50 rounded-2xl flex items-center justify-center text-brand-600 text-xl border border-brand-100">
+                            <i class="fa-solid fa-book"></i>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-2xl border border-slate-100 flex items-center justify-between shadow-sm">
+                        <div>
+                            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Active Borrowers</span>
+                            <h3 class="text-3xl font-black text-slate-800 mt-1">102</h3>
+                            <span class="text-xs text-brand-600 font-semibold mt-1 inline-block"><i class="fa-solid fa-arrow-up"></i> +89 users</span>
+                        </div>
+                        <div class="w-14 h-14 bg-brand-50 rounded-2xl flex items-center justify-center text-brand-600 text-xl border border-brand-100">
+                            <i class="fa-solid fa-user-check"></i>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-2xl border border-slate-100 flex items-center justify-between shadow-sm">
+                        <div>
+                            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Active Loans</span>
+                            <h3 class="text-3xl font-black text-slate-800 mt-1">32</h3>
+                            <span class="text-xs text-amber-600 font-semibold mt-1 inline-block">19 items due today</span>
+                        </div>
+                        <div class="w-14 h-14 bg-amber-50 rounded-2xl flex items-center justify-center text-amber-600 text-xl border border-amber-100">
+                            <i class="fa-solid fa-circle-arrow-right"></i>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-2xl border border-slate-100 flex items-center justify-between shadow-sm">
+                        <div>
+                            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Fine Overdue</span>
+                            <h3 class="text-3xl font-black text-slate-800 mt-1">200.00</h3>
+                            <span class="text-xs text-red-500 font-semibold mt-1 inline-block">12 active accounts locked</span>
+                        </div>
+                        <div class="w-14 h-14 bg-red-50 rounded-2xl flex items-center justify-center text-red-500 text-xl border border-red-100">
+                            <i class="fa-solid fa-triangle-exclamation"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="lg:col-span-2 bg-white rounded-2xl border border-slate-100 p-6 shadow-sm flex flex-col">
+                        <div class="flex items-center justify-between mb-4">
+                            <h4 class="font-extrabold text-slate-800 tracking-wide">Live Circulation Records</h4>
+                            <button onclick="switchTab('tab-catalog')" class="text-xs text-brand-600 hover:underline font-bold">Catalog Management</button>
+                        </div>
+                        <div class="overflow-x-auto flex-1">
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr class="text-xs font-bold tracking-wider uppercase text-slate-400 bg-slate-50 border-b border-slate-100">
+                                        <th class="py-3.5 px-4">Catalog Choice</th>
+                                        <th class="py-3.5 px-4">Borrower Name</th>
+                                        <th class="py-3.5 px-4">Check Out Date</th>
+                                        <th class="py-3.5 px-4">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="text-sm divide-y divide-slate-100">
+                                    <tr>
+                                        <td class="py-4 px-4">
+                                            <span class="font-bold text-slate-800 block">System Design Frameworks</span>
+                                            <span class="text-xs text-slate-400">978-3161484100</span>
+                                        </td>
+                                        <td class="py-4 px-4 text-slate-600 font-semibold">Maria<span class="text-xs block font-normal text-slate-400">#M-102</span></td>
+                                        <td class="py-4 px-4 text-slate-500 font-medium">June 18, 2026</td>
+                                        <td class="py-4 px-4"><span class="px-2.5 py-1 bg-emerald-50 text-emerald-700 text-xs font-bold rounded-lg border border-emerald-100">Returned</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="py-4 px-4">
+                                            <span class="font-bold text-slate-800 block">Database Storage Essentials</span>
+                                            <span class="text-xs text-slate-400">978-0131489061</span>
+                                        </td>
+                                        <td class="py-4 px-4 text-slate-600 font-semibold">Eunora<span class="text-xs block font-normal text-slate-400">#M-109</span></td>
+                                        <td class="py-4 px-4 text-slate-500 font-medium">Apr 29, 2026</td>
+                                        <td class="py-4 px-4"><span class="px-2.5 py-1 bg-amber-50 text-amber-700 text-xs font-bold rounded-lg border border-amber-100">Borrowed</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="py-4 px-4">
+                                            <span class="font-bold text-slate-800 block">Clean Coding Architectures</span>
+                                            <span class="text-xs text-slate-400">978-0132350884</span>
+                                        </td>
+                                        <td class="py-4 px-4 text-slate-600 font-semibold">Dela Cruz<span class="text-xs block font-normal text-slate-400">#M-112</span></td>
+                                        <td class="py-4 px-4 text-slate-500 font-medium">Apr 15, 2026</td>
+                                        <td class="py-4 px-4"><span class="px-2.5 py-1 bg-red-50 text-red-700 text-xs font-bold rounded-lg border border-red-100">Overdue</span></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-2xl border border-slate-100 p-6 shadow-sm flex flex-col justify-between">
+                        <div>
+                            <h4 class="font-extrabold text-slate-800 mb-4 tracking-wide">System Shortcuts</h4>
+                            <div class="space-y-3">
+                                <button onclick="openModal()" class="w-full flex items-center justify-between p-3.5 bg-slate-50 hover:bg-brand-50/50 rounded-xl transition text-left border border-slate-100/80 hover:border-brand-200">
+                                    <div class="flex items-center">
+                                        <i class="fa-solid fa-plus-circle text-brand-600 mr-3.5 text-xl"></i>
+                                        <div>
+                                            <p class="text-sm font-bold text-slate-800">New Catalog Listing</p>
+                                            <p class="text-xs text-slate-400">Register incoming physical media</p>
+                                        </div>
+                                    </div>
+                                    <i class="fa-solid fa-chevron-right text-slate-300"></i>
+                                </button>
+                                <button onclick="switchTab('tab-members')" class="w-full flex items-center justify-between p-3.5 bg-slate-50 hover:bg-brand-50/50 rounded-xl transition text-left border border-slate-100/80 hover:border-brand-200">
+                                    <div class="flex items-center">
+                                        <i class="fa-solid fa-user-plus text-brand-600 mr-3.5 text-xl"></i>
+                                        <div>
+                                            <p class="text-sm font-bold text-slate-800">Register Reader</p>
+                                            <p class="text-xs text-slate-400">Onboard students & faculty</p>
+                                        </div>
+                                    </div>
+                                    <i class="fa-solid fa-chevron-right text-slate-300"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs text-slate-400 select-none">
+                            <span>Service Connection:</span>
+                            <span class="flex items-center text-emerald-600 font-bold">
+                                <span class="w-2 h-2 bg-emerald-500 rounded-full mr-1.5 animate-pulse"></span> Fully Connected
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="tab-catalog" class="tab-content flex-1 p-8 overflow-y-auto bg-slate-50 custom-scrollbar hidden">
+                <div class="flex items-center justify-between mb-6">
+                    <div>
+                        <h2 class="text-2xl font-extrabold text-slate-900 tracking-tight">Book Registry</h2>
+                        <p class="text-slate-500 text-sm mt-0.5">Monitor or update active inventory records.</p>
+                    </div>
+                    <button onclick="openModal()" class="px-5 py-2.5 bg-brand-600 hover:bg-brand-700 text-white text-sm font-bold rounded-xl flex items-center transition shadow-lg shadow-brand-500/10">
+                        <i class="fa-solid fa-plus mr-2 text-xs"></i> Add Book
+                    </button>
+                </div>
+
+                <div class="bg-white rounded-2xl border border-slate-100 p-6 shadow-sm overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="text-xs font-bold tracking-wider uppercase text-slate-400 bg-slate-50 border-b border-slate-100">
+                                    <th class="py-4 px-4">Title & Author</th>
+                                    <th class="py-4 px-4">Genre Category</th>
+                                    <th class="py-4 px-4">ISBN</th>
+                                    <th class="py-4 px-4">Stock Registered</th>
+                                    <th class="py-4 px-4">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="text-sm divide-y divide-slate-100" id="catalog-table-body">
+                                <tr>
+                                    <td class="py-4 px-4">
+                                        <p class="font-bold text-slate-800">The Notebook</p>
+                                        <p class="text-xs text-slate-400">Scoth</p>
+                                    </td>
+                                    <td class="py-4 px-4 text-slate-600 font-semibold">Fiction / Classics</td>
+                                    <td class="py-4 px-4 text-slate-500 font-mono text-xs">978-0743273565</td>
+                                    <td class="py-4 px-4 text-slate-600"><b class="text-slate-900 font-extrabold">12</b> of 12 available</td>
+                                    <td class="py-4 px-4">
+                                        <button class="text-brand-600 hover:text-brand-800 font-bold transition mr-3"><i class="fa-solid fa-pen"></i></button>
+                                        <button onclick="this.closest('tr').remove()" class="text-red-500 hover:text-red-700 font-bold transition"><i class="fa-solid fa-trash-can"></i></button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="py-4 px-4">
+                                        <p class="font-bold text-slate-800">Atomic Habits</p>
+                                        <p class="text-xs text-slate-400">Juan Cruz</p>
+                                    </td>
+                                    <td class="py-4 px-4 text-slate-600 font-semibold">Personal Growth</td>
+                                    <td class="py-4 px-4 text-slate-500 font-mono text-xs">978-0735211292</td>
+                                    <td class="py-4 px-4 text-slate-600"><b class="text-slate-900 font-extrabold">5</b> of 5 available</td>
+                                    <td class="py-4 px-4">
+                                        <button class="text-brand-600 hover:text-brand-800 font-bold transition mr-3"><i class="fa-solid fa-pen"></i></button>
+                                        <button onclick="this.closest('tr').remove()" class="text-red-500 hover:text-red-700 font-bold transition"><i class="fa-solid fa-trash-can"></i></button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div id="tab-members" class="tab-content flex-1 p-8 overflow-y-auto bg-slate-50 custom-scrollbar hidden">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-extrabold text-slate-900 tracking-tight">Members & Staff Registry</h2>
+                    <p class="text-slate-500 text-sm mt-0.5">Manage permissions and view transaction statuses.</p>
+                </div>
+
+                <div class="bg-white rounded-2xl border border-slate-100 p-6 shadow-sm overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="text-xs font-bold tracking-wider uppercase text-slate-400 bg-slate-50 border-b border-slate-100">
+                                    <th class="py-4 px-4">Full Member Name</th>
+                                    <th class="py-4 px-4">Identifier ID</th>
+                                    <th class="py-4 px-4">Access Level</th>
+                                    <th class="py-4 px-4">Standing Status</th>
+                                </tr>
+                            </thead>
+                            <tbody class="text-sm divide-y divide-slate-100">
+                                <tr>
+                                    <td class="py-4 px-4 font-bold text-slate-800">Gleine</td>
+                                    <td class="py-4 px-4 text-slate-500 font-mono">#M-1029</td>
+                                    <td class="py-4 px-4 text-slate-600 font-medium">Reader Student</td>
+                                    <td class="py-4 px-4"><span class="px-2.5 py-1 bg-emerald-50 text-emerald-700 text-xs font-bold rounded-lg border border-emerald-100">Active</span></td>
+                                </tr>
+                                <tr>
+                                    <td class="py-4 px-4 font-bold text-slate-800">Ruvee</td>
+                                    <td class="py-4 px-4 text-slate-500 font-mono">#M-5678</td>
+                                    <td class="py-4 px-4 text-slate-600 font-medium">Faculty Professor</td>
+                                    <td class="py-4 px-4"><span class="px-2.5 py-1 bg-emerald-50 text-emerald-700 text-xs font-bold rounded-lg border border-emerald-100">Active</span></td>
+                                </tr>
+                                <tr>
+                                    <td class="py-4 px-4 font-bold text-slate-800">Eriz</td>
+                                    <td class="py-4 px-4 text-slate-500 font-mono">#M-1234</td>
+                                    <td class="py-4 px-4 text-slate-600 font-medium">Guest Researcher</td>
+                                    <td class="py-4 px-4"><span class="px-2.5 py-1 bg-amber-50 text-amber-700 text-xs font-bold rounded-lg border border-amber-100">Suspended</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+
+    <div id="add-book-modal" class="hidden fixed inset-0 bg-slate-900/60 flex items-center justify-center z-50 p-4 backdrop-blur-sm select-none">
+        <div class="bg-white w-full max-w-lg rounded-2xl p-6 md:p-8 border border-slate-100 shadow-2xl flex flex-col max-h-[90vh]">
+            
+            <div class="flex justify-between items-center pb-5 border-b border-slate-100 shrink-0">
+                <div class="flex items-center">
+                    <div class="w-11 h-11 bg-brand-50 text-brand-600 rounded-xl flex items-center justify-center mr-3 font-semibold border border-brand-100">
+                        <i class="fa-solid fa-plus text-sm"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-extrabold text-slate-900 leading-none mb-1">Add Book Entry</h3>
+                        <p class="text-xs text-slate-400">Add physical media resources to active databases</p>
+                    </div>
+                </div>
+                <button onclick="closeModal()" class="p-2 text-slate-400 hover:text-red-500 transition"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+
+            <form id="add-book-form" onsubmit="handleBookSubmission(event)" class="space-y-4 mt-6 overflow-y-auto flex-1 pr-1 custom-scrollbar">
+                <div>
+                    <label class="block mb-1 text-xs font-bold text-slate-600 uppercase tracking-wider" for="book-title">Title</label>
+                    <input type="text" id="book-title" required 
+                        class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition text-sm font-medium" 
+                        placeholder="e.g. Fundamental Physics">
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block mb-1 text-xs font-bold text-slate-600 uppercase tracking-wider" for="book-author">Primary Author</label>
+                        <input type="text" id="book-author" required 
+                            class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition text-sm font-medium" 
+                            placeholder="e.g. Lorraine De Guzman">
+                    </div>
+                    <div>
+                        <label class="block mb-1 text-xs font-bold text-slate-600 uppercase tracking-wider" for="book-isbn">ISBN Code</label>
+                        <input type="text" id="book-isbn" required 
+                            class="w-full px-4 py-3 bg-slate-50 font-mono text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition text-slate-600" 
+                            placeholder="978-0198526636">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block mb-1 text-xs font-bold text-slate-600 uppercase tracking-wider" for="book-category">Genre / Category</label>
+                        <input type="text" id="book-category" required 
+                            class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition text-sm font-medium" 
+                            placeholder="e.g. Non-Fiction">
+                    </div>
+                    <div>
+                        <label class="block mb-1 text-xs font-bold text-slate-600 uppercase tracking-wider" for="book-qty">Total Stock Quantity</label>
+                        <input type="number" id="book-qty" min="1" required 
+                            class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition text-sm font-medium" 
+                            placeholder="10">
+                    </div>
+                </div>
+
+                <div class="pt-6 border-t border-slate-100 flex items-center justify-end space-x-3 mt-4 shrink-0">
+                    <button type="button" onclick="closeModal()" 
+                        class="px-5 py-3 bg-slate-100 hover:bg-slate-200 text-slate-600 text-sm font-bold rounded-xl transition">
+                        Cancel
+                    </button>
+                    <button type="submit" 
+                        class="px-5 py-3 bg-brand-600 hover:bg-brand-700 text-white text-sm font-bold rounded-xl shadow-lg shadow-brand-500/10 transition flex items-center">
+                        <i class="fa-solid fa-check mr-2 text-xs"></i> Register Book
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+    <script>
+        // Synchronizes login input keystrokes to dynamic UI user displays
+        function syncUsername() {
+            const inputVal = document.getElementById('username').value.trim();
+            if (inputVal) {
+                document.getElementById('active-user-display').innerText = inputVal;
+                document.getElementById('user-initial').innerText = inputVal.charAt(0).toUpperCase();
+            } else {
+                document.getElementById('active-user-display').innerText = "Curator";
+                document.getElementById('user-initial').innerText = "C";
+            }
+        }
+
+        // Action trigger handling login flow
+        function handleLoginFlow(event) {
+            event.preventDefault();
+            const staffId = document.getElementById('username').value.trim();
+
+            if (staffId === "") {
+                alert("Please enter a valid staff ID or username to log in.");
+                return;
+            }
+
+            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('dashboard').classList.remove('hidden');
+        }
+
+        // Resets components back to default login status
+        function handleLogoutFlow() {
+            document.getElementById('dashboard').classList.add('hidden');
+            document.getElementById('username').value = "";
+            syncUsername();
+            document.getElementById('login-screen').classList.remove('hidden');
+        }
+
+        // Single page tab container switching functionality
+        function switchTab(targetTabId) {
+            const views = document.querySelectorAll('.tab-content');
+            views.forEach(v => v.classList.add('hidden'));
+
+            const links = document.querySelectorAll('.nav-link');
+            links.forEach(link => {
+                link.classList.remove('bg-slate-900', 'text-white');
+                link.classList.add('text-slate-400');
+                const i = link.querySelector('i');
+                if (i) i.classList.remove('text-brand-500');
+            });
+
+            document.getElementById(targetTabId).classList.remove('hidden');
+
+            const activeNav = document.getElementById('nav-' + targetTabId.replace('tab-', ''));
+            if (activeNav) {
+                activeNav.classList.add('bg-slate-900', 'text-white');
+                activeNav.classList.remove('text-slate-400');
+                const activeIcon = activeNav.querySelector('i');
+                if (activeIcon) activeIcon.classList.add('text-brand-500');
+            }
+        }
+
+        // General modal display operations
+        function openModal() {
+            document.getElementById('add-book-modal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('add-book-modal').classList.add('hidden');
+            document.getElementById('add-book-form').reset();
+        }
+
+        // Dynamically appends a new table listing row
+        function handleBookSubmission(event) {
+            event.preventDefault();
+
+            const title = document.getElementById('book-title').value;
+            const author = document.getElementById('book-author').value;
+            const category = document.getElementById('book-category').value;
+            const isbn = document.getElementById('book-isbn').value;
+            const qty = document.getElementById('book-qty').value;
+
+            const table = document.getElementById('catalog-table-body');
+            const row = `
+                <tr>
+                    <td class="py-4 px-4">
+                        <p class="font-bold text-slate-800">${title}</p>
+                        <p class="text-xs text-slate-400">${author}</p>
+                    </td>
+                    <td class="py-4 px-4 text-slate-600 font-semibold">${category}</td>
+                    <td class="py-4 px-4 text-slate-500 font-mono text-xs">${isbn}</td>
+                    <td class="py-4 px-4 text-slate-600"><b class="text-slate-900 font-extrabold">${qty}</b> of ${qty} available</td>
+                    <td class="py-4 px-4">
+                        <button class="text-brand-600 hover:text-brand-800 font-bold transition mr-3"><i class="fa-solid fa-pen"></i></button>
+                        <button onclick="this.closest('tr').remove()" class="text-red-500 hover:text-red-700 font-bold transition"><i class="fa-solid fa-trash-can"></i></button>
+                    </td>
+                </tr>
+            `;
+
+            table.insertAdjacentHTML('afterbegin', row);
+            closeModal();
+            switchTab('tab-catalog');
+        }
+    </script>
+</body>
+</html>
